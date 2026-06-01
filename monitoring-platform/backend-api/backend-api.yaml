@@ -1,0 +1,133 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: monitoring-backend-code
+  namespace: monitoring
+
+data:
+  main.py: |
+    from fastapi import FastAPI
+    from pydantic import BaseModel
+    import psycopg2
+
+    app = FastAPI()
+
+    DB_HOST = "monitoring-postgres-rw"
+    DB_NAME = "monitoring"
+    DB_USER = "monitorapi"
+    DB_PASSWORD = "monitor123"
+
+    class NodeMetric(BaseModel):
+        hostname: str
+        ip_address: str
+        cpu_usage: str
+        total_memory: str
+        used_memory: str
+        disk_usage: str
+
+    @app.get("/")
+    def home():
+        return {"status":"Monitoring Backend Running"}
+
+    @app.post("/api/node_metrics")
+    def insert_metrics(metric: NodeMetric):
+
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            database=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD
+        )
+
+        cur = conn.cursor()
+
+        cur.execute("""
+        INSERT INTO node_metrics (
+            hostname,
+            ip_address,
+            cpu_usage,
+            total_memory,
+            used_memory,
+            disk_usage
+        )
+        VALUES (%s,%s,%s,%s,%s,%s)
+        """, (
+            metric.hostname,
+            metric.ip_address,
+            metric.cpu_usage,
+            metric.total_memory,
+            metric.used_memory,
+            metric.disk_usage
+        ))
+
+        conn.commit()
+
+        cur.close()
+        conn.close()
+
+        return {"message":"metrics inserted"}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monitoring-backend
+  namespace: monitoring
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: monitoring-backend
+
+  template:
+    metadata:
+      labels:
+        app: monitoring-backend
+
+    spec:
+      containers:
+      - name: backend
+
+        image: python:3.11
+
+        command:
+        - /bin/sh
+        - -c
+
+        args:
+        - |
+          pip install fastapi uvicorn psycopg2-binary pydantic && \
+          uvicorn main:app --host 0.0.0.0 --port 8000
+
+        ports:
+        - containerPort: 8000
+
+        volumeMounts:
+        - name: backend-code
+          mountPath: /app
+
+        workingDir: /app
+
+      volumes:
+      - name: backend-code
+        configMap:
+          name: monitoring-backend-code
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: monitoring-backend
+  namespace: monitoring
+
+spec:
+  selector:
+    app: monitoring-backend
+
+  ports:
+  - port: 8000
+    targetPort: 8000
+
+  type: NodePort

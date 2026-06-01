@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: monitoring-db-secret
+  namespace: monitoring
+type: kubernetes.io/basic-auth
+stringData:
+  username: monitor
+  password: monitor123
+
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: monitoring-postgres
+  namespace: monitoring
+
+spec:
+  instances: 1
+
+  storage:
+    size: 5Gi
+
+  bootstrap:
+    initdb:
+      database: monitoring
+      owner: monitor
+      secret:
+        name: monitoring-db-secret

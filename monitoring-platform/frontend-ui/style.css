@@ -1,0 +1,623 @@
+body {
+
+    background-color: #081226;
+
+    color: white;
+
+    font-family: Arial;
+
+    margin: 0;
+}
+
+.header {
+
+    background-color: #0f172a;
+
+    padding: 20px;
+
+    text-align: center;
+
+    font-size: 28px;
+
+    font-weight: bold;
+}
+
+.details-card {
+
+    background-color: #1e293b;
+
+    margin: 20px;
+
+    padding: 20px;
+
+    border-radius: 10px;
+}
+
+table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    margin-top: 20px;
+}
+
+th, td {
+
+    border: 1px solid #475569;
+
+    padding: 10px;
+
+    text-align: left;
+}
+
+th {
+
+    background-color: #334155;
+}
+
+[root@ansible frontend-ui]# cat server.html 
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Server Details</title>
+
+    <link rel="stylesheet" href="server.css">
+
+</head>
+
+<body>
+
+    <div class="header">
+
+        Server Detailed Monitoring
+
+    </div>
+
+    <div id="details-container"></div>
+
+    <script src="server.js"></script>
+
+</body>
+
+</html>
+[root@ansible frontend-ui]# cat server.js 
+function getHostname() {
+
+    const params =
+        new URLSearchParams(window.location.search);
+
+    return params.get("hostname");
+}
+
+async function loadServerDetails() {
+
+    const hostname = getHostname();
+
+    const response =
+        await fetch("http://192.168.7.239:8000/api/servers");
+
+    const servers = await response.json();
+
+    const server =
+        servers.find(s => s.hostname == hostname);
+
+    const container =
+        document.getElementById("details-container");
+
+    container.innerHTML = `
+
+    <div class="details-card">
+
+        <h1>${server.hostname}</h1>
+
+        <p><b>IP:</b> ${server.ip_address}</p>
+
+        <p><b>OS:</b> ${server.operating_system}</p>
+
+        <p><b>Kernel:</b> ${server.kernel_version}</p>
+
+        <p><b>Uptime:</b> ${server.uptime}</p>
+
+        <p><b>CPU Usage:</b> ${server.cpu_usage}%</p>
+
+        <p><b>Memory Usage:</b> ${server.used_memory_percentage}</p>
+
+	<p>
+	<b>NTP Status:</b>
+
+	<span style="color:${server.status_ntp == 'RUNNING' ? 'lime' : 'red'}">
+	${server.status_ntp}
+	</span>
+	</p>
+
+	<p>
+	<b>NTP Sync:</b>
+
+	<span style="color:${server.ntp_sync_status == 'SYNCED' ? 'lime' : 'orange'}">
+	${server.ntp_sync_status}
+	</span>
+	</p>
+
+	<p><b>Processes:</b> ${server.total_processes}</p>
+
+        
+        <h2>Filesystem Usage</h2>
+
+        <table>
+
+            <tr>
+                <th>Filesystem</th>
+                <th>Size</th>
+                <th>Used</th>
+                <th>Avail</th>
+                <th>Use%</th>
+                <th>Mount</th>
+            </tr>
+
+            ${
+                server.disk_data.map(disk => `
+                <tr>
+                    <td>${disk.filesystem}</td>
+                    <td>${disk.size}</td>
+                    <td>${disk.used}</td>
+                    <td>${disk.avail}</td>
+                    <td>${disk.use}</td>
+                    <td>${disk.mount}</td>
+                </tr>
+                `).join("")
+            }
+
+        </table>
+
+    </div>
+    `;
+}
+
+loadServerDetails();
+
+[root@ansible frontend-ui]# cat style.css 
+body {
+
+    background-color: #0b1120;
+    color: white;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+
+    text-align: center;
+    margin-bottom: 30px;
+    color: white;
+}
+
+#server-container {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(320px, 1fr));
+
+    gap: 20px;
+}
+
+.server-link {
+
+    text-decoration: none;
+    color: white;
+}
+
+.summary-card {
+
+    background: #1e293b;
+
+    border-radius: 14px;
+
+    padding: 20px;
+
+    border: 1px solid #334155;
+
+    box-shadow: 0px 0px 15px rgba(0,0,0,0.5);
+
+    transition: 0.3s;
+}
+
+.summary-card:hover {
+
+    transform: scale(1.03);
+
+    box-shadow: 0px 0px 20px cyan;
+}
+
+.summary-card h2 {
+
+    color: #38bdf8;
+    margin-top: 0;
+}
+
+.green {
+
+    color: #22c55e;
+    font-weight: bold;
+}
+
+.red {
+
+    color: #ef4444;
+    font-weight: bold;
+}
+
+.progress-bar {
+
+    width: 100%;
+
+    height: 18px;
+
+    background-color: #334155;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+
+    margin-top: 5px;
+}
+
+.progress {
+
+    height: 100%;
+}
+
+.low {
+
+    background-color: #22c55e;
+}
+
+.medium {
+
+    background-color: #eab308;
+}
+
+.high {
+
+    background-color: #ef4444;
+}
+
+hr {
+
+    border: 0;
+
+    border-top: 1px solid #475569;
+
+    margin: 15px 0;
+}
+
+.full-width {
+
+    grid-column: 1 / -1;
+}
+
+.service-title {
+
+    color: white;
+    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 20px;
+}
+
+.service-main-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(280px, 1fr));
+
+    gap: 20px;
+}
+
+.service-card {
+
+    background: #16213e;
+
+    border-radius: 15px;
+
+    padding: 20px;
+
+    color: white;
+
+    border: 1px solid #334155;
+
+    box-shadow: 0px 0px 15px rgba(0,0,0,0.5);
+
+    transition: 0.3s;
+}
+
+.service-card:hover {
+
+    transform: scale(1.03);
+
+    box-shadow: 0px 0px 20px cyan;
+}
+
+.service-card h2 {
+
+    color: #38bdf8;
+    margin-top: 0;
+}
+
+.service-card p {
+
+    margin: 10px 0;
+    line-height: 1.5;
+}
+.login-body {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    height: 100vh;
+}
+
+.login-box {
+
+    background: #1e293b;
+
+    padding: 40px;
+
+    border-radius: 15px;
+
+    width: 350px;
+
+    text-align: center;
+
+    box-shadow: 0px 0px 20px rgba(0,0,0,0.5);
+}
+
+.login-box h1 {
+
+    margin-bottom: 30px;
+
+    color: #38bdf8;
+}
+
+.login-box input {
+
+    width: 100%;
+
+    padding: 12px;
+
+    margin-bottom: 15px;
+
+    border-radius: 8px;
+
+    border: none;
+
+    background: #334155;
+
+    color: white;
+}
+
+.login-box button {
+
+    width: 100%;
+
+    padding: 12px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #38bdf8;
+
+    color: white;
+
+    font-size: 16px;
+
+    cursor: pointer;
+}
+
+.login-box button:hover {
+
+    background: #0ea5e9;
+}
+
+.logout-btn {
+
+    position: fixed;
+
+    top: 20px;
+
+    right: 20px;
+
+    background: #ef4444;
+
+    border: none;
+
+    color: white;
+
+    padding: 10px 15px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    z-index: 9999;
+
+    font-weight: bold;
+}
+#error {
+
+    color: red;
+
+    margin-top: 10px;
+}
+.cdot-login-body {
+
+    margin: 0;
+
+    padding: 0;
+
+    font-family: Arial, sans-serif;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,170,90,0.8),
+            rgba(240,240,240,0.9),
+            rgba(170,255,170,0.7)
+        );
+
+    height: 100vh;
+}
+
+.top-logo {
+
+    position: absolute;
+
+    top: 20px;
+
+    left: 20px;
+}
+
+.top-logo img {
+    width: 120px;
+    height: auto;
+}
+
+.login-container {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    height: 100vh;
+}
+
+.login-card {
+
+    width: 450px;
+
+    background: rgba(255,255,255,0.95);
+
+    padding: 40px;
+
+    border-radius: 12px;
+
+    box-shadow: 0px 0px 20px rgba(0,0,0,0.2);
+}
+
+.login-header {
+
+    text-align: center;
+
+    margin-bottom: 30px;
+}
+
+.center-logo {
+    width: 120px;
+    height: auto;
+    display: block;
+    margin: 0 auto 20px auto;
+}
+
+.login-header h1 {
+
+    color: #1e88e5;
+
+    font-size: 24px;
+
+    line-height: 1.4;
+}
+
+.login-card label {
+
+    display: block;
+
+    margin-bottom: 8px;
+
+    margin-top: 15px;
+
+    font-weight: bold;
+
+    color: #333;
+}
+
+.login-card input {
+
+    width: 100%;
+
+    padding: 12px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 5px;
+
+    font-size: 14px;
+
+    box-sizing: border-box;
+}
+
+.login-card button {
+
+    width: 100%;
+
+    margin-top: 30px;
+
+    padding: 14px;
+
+    border: none;
+
+    border-radius: 30px;
+
+    background: #42a5f5;
+
+    color: white;
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+}
+
+.login-card button:hover {
+
+    background: #1e88e5;
+}
+
+.footer-text {
+
+    margin-top: 30px;
+
+    text-align: center;
+
+    color: #555;
+}
+
+.footer-text span {
+
+    color: #1e88e5;
+
+    font-weight: bold;
+}
+
+#error {
+
+    text-align: center;
+
+    color: red;
+
+    margin-top: 15px;
+
+    font-weight: bold;
+}
