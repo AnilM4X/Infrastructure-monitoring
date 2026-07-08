@@ -8,7 +8,7 @@ function login() {
 
     if (
         username === "admin" &&
-        password === "!Kuber@1234#"
+        password === "xxxxxxxxxx"
     ) {
 
         localStorage.setItem(
