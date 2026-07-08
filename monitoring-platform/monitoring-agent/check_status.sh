@@ -1,6 +1,6 @@
 #!/bin/bash
 
-API_ENDPOINT="http://192.168.126.223:8000/api/node_metrics"
+API_ENDPOINT="http://IP:8000/api/node_metrics"
 
 check_service() {
 
@@ -39,17 +39,17 @@ else
     ntp_sync_status="NOT_SYNCED"
 fi
 
-status_nexus=$(check_service "http://nexust.cdot.in:8081/")
+status_nexus=$(check_service "<URL>")
 
-status_freeipa=$(check_service "https://labfreeipa.cdot.in/")
+status_freeipa=$(check_service "<URL>")
 
-status_rancher=$(check_service "https://ranchert.cdot.in/")
+status_rancher=$(check_service "<URL>")
 
-status_elk=$(check_service "http://testelk.cdot.in")
+status_elk=$(check_service "<URL>")
 
-status_ingress=$(check_service "http://testingress.cdot.in")
+status_ingress=$(check_service "<URL>")
 
-status_ovirt=$(check_service "https://ovirtemt.cdot.in/")
+status_ovirt=$(check_service "<URL>")
 
 total_cpu=$(nproc)
 
