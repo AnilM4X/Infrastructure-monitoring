@@ -4,23 +4,23 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-DB_HOST = "192.168.7.239"
+DB_HOST = "<IP>"
 DB_NAME = "monitoring"
 DB_USER = "monitor"
 DB_PASSWORD = "monitor123"
 
-SMTP_SERVER = "smtp.mgovcloud.in"
+SMTP_SERVER = "<smtp server>"
 SMTP_PORT = 587
 
-FROM_MAIL = "csgdevops@cdot.in"
+FROM_MAIL = "<mail>"
 
-SMTP_USERNAME = "csgdevops@cdot.in"
+SMTP_USERNAME = "<mail>"
 
-SMTP_PASSWORD = "L6ePYJPVBwZE"
+SMTP_PASSWORD = "xxxxxxx"
 
 TO_MAILS = [
-    "csgdevops@cdot.in",
-    "mrajak@cdot.in",
+    "<mail>",
+    "<2ndmail>",
 ]
 
 conn = psycopg2.connect(
