@@ -14,7 +14,7 @@ function getBarClass(value) {
 async function loadServers() {
 
     const response =
-        await fetch("http://192.168.126.223:8000/api/servers");
+        await fetch("http://xxx.xxx.xxx.xxx:8000/api/servers");
 
     const servers = await response.json();
 
